@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "Elasticsearch Query Helper AI",
+  "version": "1.0.0",
+  "description": "AI-powered Elasticsearch query generation with multi-agent intelligence",
+  "permissions": [
+    "storage",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.openai.com/*",
+    "https://api.anthropic.com/*",
+    "http://localhost:*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "action": {
+    "default_title": "Open Elasticsearch Query Helper",
+    "default_popup": ""
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; connect-src https://generativelanguage.googleapis.com https://api.openai.com https://api.anthropic.com http://localhost:*"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  }
+}

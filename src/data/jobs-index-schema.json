@@ -1,0 +1,22 @@
+{
+  "mappings": {
+    "properties": {
+      "job_title": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+      "company_name": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+      "location": { "type": "text" },
+      "standardized_geo_point": { "type": "geo_point" },
+      "crawled_date": { "type": "date" },
+      "posted_date": { "type": "date" },
+      "job_description": { "type": "text" },
+      "raw_salary": { "type": "text" },
+      "skills.name": { "type": "text", "fields": { "keyword": { "type": "keyword" } } },
+      "is_deleted.keyword": { "type": "keyword" },
+      "is_duplicate": { "type": "boolean" },
+      "source_name.keyword": { "type": "keyword" },
+      "country_code.keyword": { "type": "keyword" }
+    }
+  },
+  "version": "7.x",
+  "lastUpdated": "2024-01-01T00:00:00Z",
+  "indexName": "jobs"
+}

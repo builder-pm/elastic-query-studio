@@ -1,0 +1,290 @@
+{
+  "sampleQueries": [
+    {
+      "id": "basic_source_search",
+      "description": "Find jobs from specific job board with recent crawl date",
+      "userIntent": "source-based filtering with time constraint",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {"match": {"source_name.keyword": "Indeed_US"}},
+              {"term": {"is_deleted.keyword": "0"}}
+            ],
+            "filter": [
+              {"range": {"crawled_date": {"gte": "now-7d/d", "lte": "now"}}}
+            ]
+          }
+        },
+        "size": 50
+      },
+      "tags": ["source_filter", "date_range", "basic_search"],
+      "complexity": "simple",
+      "successRate": 95,
+      "performanceNotes": "Fast execution with indexed fields"
+    },
+    {
+      "id": "geo_proximity_search",
+      "description": "Find jobs within 50km of Frankfurt",
+      "userIntent": "location-based proximity search",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {"term": {"is_deleted.keyword": "0"}},
+              {"term": {"is_duplicate": false}}
+            ],
+            "filter": [
+              {
+                "geo_distance": {
+                  "distance": "50km",
+                  "standardized_geo_point": {
+                    "lat": 50.1109,
+                    "lon": 8.6821
+                  }
+                }
+              },
+              {"range": {"crawled_date": {"gte": "now-30d/d"}}}
+            ]
+          }
+        }
+      },
+      "tags": ["geo_search", "location", "proximity"],
+      "complexity": "medium",
+      "successRate": 88,
+      "performanceNotes": "Requires geo-enabled fields"
+    },
+    {
+      "id": "skills_match_search",
+      "description": "Find software engineering jobs requiring Python and machine learning",
+      "userIntent": "skills and title matching",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {"match": {"job_title": "software engineer"}},
+              {"match": {"job_description": "Python"}},
+              {"match": {"job_description": "machine learning"}},
+              {"term": {"is_deleted.keyword": "0"}}
+            ],
+            "filter": [
+              {"range": {"crawled_date": {"gte": "now-14d/d"}}}
+            ]
+          }
+        }
+      },
+      "tags": ["skills", "job_title", "technology"],
+      "complexity": "medium",
+      "successRate": 92,
+      "performanceNotes": "Good performance with proper field analysis"
+    },
+    {
+      "id": "company_filter_search",
+      "description": "Find all jobs at Google or Microsoft",
+      "userIntent": "company-specific job search",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "terms": {
+                  "company_name.keyword": ["Google", "Microsoft", "Alphabet Inc."]
+                }
+              },
+              {"term": {"is_deleted.keyword": "0"}}
+            ],
+            "filter": [
+              {"range": {"crawled_date": {"gte": "now-30d/d"}}}
+            ]
+          }
+        }
+      },
+      "tags": ["company", "multiple_values", "exact_match"],
+      "complexity": "simple",
+      "successRate": 96,
+      "performanceNotes": "Very fast with keyword fields"
+    },
+    {
+      "id": "salary_range_search",
+      "description": "Find jobs with salary information excluding N/A values",
+      "userIntent": "salary-based filtering",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {"exists": {"field": "raw_salary"}},
+              {"term": {"is_deleted.keyword": "0"}}
+            ],
+            "must_not": [
+              {"match_phrase": {"raw_salary": "NA"}},
+              {"match_phrase": {"raw_salary": "#N/A"}}
+            ],
+            "filter": [
+              {"range": {"crawled_date": {"gte": "now-7d/d"}}}
+            ]
+          }
+        }
+      },
+      "tags": ["salary", "exists", "exclusion"],
+      "complexity": "medium",
+      "successRate": 85,
+      "performanceNotes": "Exists queries can be slower on large datasets"
+    },
+    {
+      "id": "date_range_field_selection",
+      "description": "Get specific fields for jobs posted in date range",
+      "userIntent": "targeted field retrieval with date filtering",
+      "query": {
+        "_source": ["job_title", "company_name", "location", "raw_salary", "url"],
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "range": {
+                  "posted_date": {
+                    "gte": "2024-01-01",
+                    "lte": "2024-12-31"
+                  }
+                }
+              },
+              {"term": {"is_deleted.keyword": "0"}}
+            ]
+          }
+        }
+      },
+      "tags": ["field_selection", "date_range", "performance"],
+      "complexity": "simple",
+      "successRate": 94,
+      "performanceNotes": "Field selection improves network performance"
+    },
+    {
+      "id": "country_aggregation",
+      "description": "Count jobs by country code",
+      "userIntent": "statistical analysis by location",
+      "query": {
+        "size": 0,
+        "query": {
+          "bool": {
+            "must": [
+              {"term": {"is_deleted.keyword": "0"}},
+              {"range": {"crawled_date": {"gte": "now-30d/d"}}}
+            ]
+          }
+        },
+        "aggs": {
+          "jobs_by_country": {
+            "terms": {
+              "field": "country_code.keyword",
+              "size": 50,
+              "order": {"_count": "desc"}
+            }
+          }
+        }
+      },
+      "tags": ["aggregation", "statistics", "country"],
+      "complexity": "medium",
+      "successRate": 91,
+      "performanceNotes": "Aggregations benefit from size:0"
+    },
+    {
+      "id": "complex_multi_criteria",
+      "description": "Lufthansa cabin crew roles in German aviation hubs",
+      "userIntent": "complex business search with multiple location and title criteria",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "bool": {
+                  "should": [
+                    {"wildcard": {"job_title.keyword": "*Crew*"}},
+                    {"wildcard": {"job_title.keyword": "*Cabin*"}},
+                    {"wildcard": {"job_title.keyword": "*Flight*"}},
+                    {"match": {"job_title": "scheduler"}}
+                  ],
+                  "minimum_should_match": 1
+                }
+              },
+              {"term": {"country_code.keyword": "DE"}},
+              {"term": {"is_deleted.keyword": "0"}}
+            ],
+            "should": [
+              {"match": {"company_name": "Lufthansa"}},
+              {"match": {"location": "Frankfurt"}},
+              {"match": {"location": "Munich"}},
+              {"match": {"location": "Hamburg"}}
+            ],
+            "filter": [
+              {"range": {"crawled_date": {"gte": "now-60d/d"}}}
+            ]
+          }
+        }
+      },
+      "tags": ["complex", "wildcard", "multiple_locations", "aviation"],
+      "complexity": "complex",
+      "successRate": 78,
+      "performanceNotes": "Wildcard queries can impact performance"
+    },
+    {
+      "id": "tech_stack_search",
+      "description": "Find developers with specific technology stack",
+      "userIntent": "technology-specific role matching",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {"match": {"job_title": "developer"}},
+              {"match": {"job_description": "React"}},
+              {"match": {"job_description": "Node.js"}},
+              {"term": {"is_deleted.keyword": "0"}}
+            ],
+            "should": [
+              {"match": {"job_description": "TypeScript"}},
+              {"match": {"job_description": "MongoDB"}},
+              {"match": {"job_description": "AWS"}}
+            ],
+            "filter": [
+              {"range": {"crawled_date": {"gte": "now-21d/d"}}}
+            ]
+          }
+        }
+      },
+      "tags": ["technology", "development", "stack"],
+      "complexity": "medium",
+      "successRate": 89,
+      "performanceNotes": "Good balance of must/should clauses"
+    },
+    {
+      "id": "remote_work_search",
+      "description": "Find remote jobs in specific categories",
+      "userIntent": "remote work opportunity search",
+      "query": {
+        "query": {
+          "bool": {
+            "must": [
+              {
+                "bool": {
+                  "should": [
+                    {"match": {"job_description": "remote"}},
+                    {"match": {"job_description": "work from home"}},
+                    {"match": {"job_description": "telecommute"}},
+                    {"match": {"location": "remote"}}
+                  ],
+                  "minimum_should_match": 1
+                }
+              },
+              {"term": {"is_deleted.keyword": "0"}}
+            ],
+            "filter": [
+              {"range": {"crawled_date": {"gte": "now-14d/d"}}}
+            ]
+          }
+        }
+      },
+      "tags": ["remote", "flexible_work", "location_independent"],
+      "complexity": "medium",
+      "successRate": 86,
+      "performanceNotes": "Text matching works well for remote work detection"
+    }
+  ]
+}
