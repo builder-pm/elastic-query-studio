@@ -1,49 +1,5 @@
 import { LLMConfiguration, LLMProvider, LLMResponse } from '../../shared/types/llm';
-// import { LLM_PROVIDERS } from '../../shared/config/llm-providers'; // This file doesn't exist yet
-
-// Placeholder for LLM_PROVIDERS until the actual file is created
-const LLM_PROVIDERS: Record<string, LLMProvider> = {
-  gemini: {
-    id: 'gemini',
-    name: 'Google Gemini',
-    models: ['gemini-1.5-pro-latest'],
-    apiEndpoint: 'https://generativelanguage.googleapis.com/v1beta',
-    authType: 'api_key',
-    defaultConfig: { temperature: 0.5, maxTokens: 2048 },
-    rateLimits: { requestsPerMinute: 60, tokensPerMinute: 1000000 },
-    supportedFeatures: ['system_prompt', 'json_output']
-  },
-  openai: {
-    id: 'openai',
-    name: 'OpenAI GPT',
-    models: ['gpt-4', 'gpt-3.5-turbo'],
-    apiEndpoint: 'https://api.openai.com/v1',
-    authType: 'api_key',
-    defaultConfig: { temperature: 0.7, maxTokens: 4096 },
-    rateLimits: { requestsPerMinute: 200, tokensPerMinute: 150000 },
-    supportedFeatures: ['system_prompt', 'json_output', 'function_calling']
-  },
-  anthropic: {
-    id: 'anthropic',
-    name: 'Anthropic Claude',
-    models: ['claude-2', 'claude-instant-1'],
-    apiEndpoint: 'https://api.anthropic.com/v1',
-    authType: 'api_key',
-    defaultConfig: { temperature: 0.7, maxTokens: 100000 },
-    rateLimits: { requestsPerMinute: 100, tokensPerMinute: 200000 },
-    supportedFeatures: ['system_prompt']
-  },
-  ollama: {
-    id: 'ollama',
-    name: 'Ollama (Local)',
-    models: ['llama2', 'mistral'],
-    apiEndpoint: 'http://localhost:11434/api', // Default, can be overridden
-    authType: 'none',
-    defaultConfig: { temperature: 0.8, maxTokens: 4096 },
-    rateLimits: { requestsPerMinute: 0, tokensPerMinute: 0 }, // No enforced limits locally
-    supportedFeatures: ['system_prompt']
-  }
-};
+import { LLM_PROVIDERS } from '../../shared/config/llm-providers';
 
 
 export class LLMClient {
